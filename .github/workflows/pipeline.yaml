@@ -1,0 +1,30 @@
+name: Pipeline
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Copia os arquivos do repósitorio
+        uses: actions/checkout@v3
+
+      - name: Instalar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Instalar Poetry
+        run: pipx install poetry
+
+      - name: Instalar Dependências
+        run: poetry install
+      
+      - name: Create .env file
+        run: |
+          echo "DATABASE_URL=postgresql+psycopg://app_user:app_password@localhost:5432/app_db" >> .env
+          echo "SECRET_KEY=your-secret-key" >> .env
+          echo "ALGORITHM=HS256" >> .env
+          echo "ACCESS_TOKEN_EXPIRE_MINUTES=30" >> .env
+
+      - name: Executar testes
+        run: poetry run task test
